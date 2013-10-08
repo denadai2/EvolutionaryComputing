@@ -19,11 +19,7 @@ public class Individual {
     private double fitness = Double.MIN_VALUE;
     static private double minValue = -5.0;
     static private double maxValue = 5.0;
-<<<<<<< HEAD
     static private double minSigma = 0.01; 
-=======
-    static private double minSigma = 0.01;
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
     static public Random ran = new Random(System.currentTimeMillis());
    
     public Individual(boolean isMultimodal){

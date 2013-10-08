@@ -11,18 +11,12 @@ public class player27 implements ContestSubmission {
     private Random rnd_;
     private ContestEvaluation evaluation_;
     private int evaluations_limit_;
-<<<<<<< HEAD
     private int populationSize = 15;
     private int offspringSize = 100;
     
     private boolean isMultimodal;
     private boolean hasStructure;
     private boolean isSeparable; 
-=======
-    private boolean isMultimodal;
-    private boolean hasStructure;
-    private boolean isSeparable;
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
 
     public player27() {
         rnd_ = new Random();
@@ -69,7 +63,6 @@ public class player27 implements ContestSubmission {
             // E.g. evaluating a series of true/false predictions
             // boolean pred[] = ...
             // Double score = (Double)evaluation_.evaluate(pred);
-<<<<<<< HEAD
             Population pop = new Population(populationSize, isMultimodal, evaluation_);
             int i = populationSize + offspringSize;
             
@@ -82,23 +75,9 @@ public class player27 implements ContestSubmission {
             while (i < evaluations_limit_) {
                 pop = Algorithm.evolvePopulation(pop, offspringSize, true, evaluation_, isMultimodal, hasStructure, isSeparable);
                 i += offspringSize;
-=======
-            int pop_size = 10;
-            int offspring = 70;
-            int i = pop_size + offspring;
-            
-            Population pop = new Population(pop_size, evaluation_);
-            /*for(int j=0;j<pop_size;j++)
-                System.out.println(pop.getIndividual(j).toString());*/
-            Algorithm.evaluation_limit = evaluations_limit_;
-            while (i < evaluations_limit_) {
-                pop = Algorithm.evolvePopulation(pop, offspring, false, evaluation_,
-                        isMultimodal, hasStructure, isSeparable);
-                i += offspring;
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
             }
             /*System.out.println("===> AFTER");
-            for(int j=0;j<pop_size;j++)
+            for(int j=0;j<15;j++)
                 System.out.println(pop.getIndividual(j).toString());*/
         } catch (Exception ex) {
             //System.out.println("adasdasd");

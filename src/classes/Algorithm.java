@@ -12,7 +12,6 @@ public class Algorithm {
     private static int evaluation_done = 0;
     private static double mutation_ratio = 1.0 / (double) Individual.geneNumber;
     private static int number_tournament_candidates = 3;
-<<<<<<< HEAD
 
     public static Population evolvePopulation(Population pop, int offspring, boolean maintainParent, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
         if (evaluation_done == 0) {
@@ -30,24 +29,6 @@ public class Algorithm {
         } 
         
         for (int i = startingPoint; i < offspring; i++) {
-=======
-
-    public static Population evolvePopulation(Population pop, int offspring, boolean maintainParent,
-            ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure,
-            boolean isSeparable) throws Exception {
-        if (evaluation_done == 0) {
-            evaluation_done += pop.size();
-        }
-        evaluation_done += offspring;
-
-        Population offspringPopulation;
-        if (maintainParent) {
-            offspringPopulation = new Population(offspring + pop.size());
-        } else {
-            offspringPopulation = new Population(offspring);
-        }
-        for (int i = 0; i < offspring; i++) {
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
             Individual parent1;
             Individual parent2;
             if (isMultimodal) {
@@ -59,10 +40,7 @@ public class Algorithm {
             }
             Individual child = crossover(parent1, parent2, isMultimodal);
             mutate(child, pop.size(), isMultimodal, Math.max(parent1.getFitness(), parent2.getFitness()));
-<<<<<<< HEAD
             
-=======
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
             Double fitness = (Double) evaluation.evaluate(child.getGenes());
             child.setFitness(fitness);
             offspringPopulation.setIndividual(child, i);
@@ -87,23 +65,13 @@ public class Algorithm {
         return fittestOffspring;
     }
 
-<<<<<<< HEAD
     public static Individual crossover(Individual parent1, Individual parent2, boolean isMultimodal) throws Exception {
         Individual child = new Individual(isMultimodal);
-=======
-    public static Individual crossover(Individual parent1, Individual parent2,
-            boolean isMultimodal) throws Exception {
-        Individual child = new Individual();
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
         double probability = 0.5;
         if (!isMultimodal) {
             probability += ((double) evaluation_done) / ((double) evaluation_limit);
         }
-<<<<<<< HEAD
         if (ran.nextDouble() < probability) { 
-=======
-        if (ran.nextDouble() < probability) {
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
             for (int i = 0; i < Individual.geneNumber; i++) {
                 if (ran.nextBoolean()) {
                     child.setGene(i, parent1.getGene(i));
@@ -122,18 +90,10 @@ public class Algorithm {
         return child;
     }
 
-<<<<<<< HEAD
     public static void mutate(Individual ind, int pop_size, boolean isMultimodal, double max_fitness) throws Exception { 
         for (int i = 0; i < Individual.geneNumber; i++) {
             if (ran.nextDouble() <= mutation_ratio) {
                 double sigma;
-=======
-    public static void mutate(Individual ind, int pop_size,
-            boolean isMultimodal, double max_fitness) throws Exception {
-        for (int i = 0; i < Individual.geneNumber; i++) {
-            if (ran.nextDouble() <= mutation_ratio) {
-                double sigma = 0;
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
                 if (isMultimodal) {
                     double tau1 = 1.0 / Math.sqrt((double) (2 * pop_size));
                     double tau = 1.0 / Math.sqrt((double) (2 * Math.sqrt(pop_size)));
@@ -141,11 +101,7 @@ public class Algorithm {
                 } else {
                     sigma = 1.0 - ((double) evaluation_done / (double) evaluation_limit);
                     sigma = Math.pow(sigma, 2);
-<<<<<<< HEAD
                 } 
-=======
-                }
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
                 ind.setSigma(i, sigma);
                 double gene = ind.getGene(i) + ran.nextGaussian() * ind.getSigma(i);
                 ind.setGene(i, gene);
@@ -159,7 +115,6 @@ public class Algorithm {
         //System.out.println("random: "+ randomNumber + " "+randomNumber2);
         return pop.getIndividual(randomNumber);
     }
-<<<<<<< HEAD
     
     private static Individual FPSSelection(Population pop) throws Exception {
         double totalFitness = 0.0;
@@ -192,9 +147,6 @@ public class Algorithm {
         return pop.getIndividual(index);
     }
     
-=======
-
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
     private static Individual tournamentSelection(Population pop, int number_tournament_candidates) throws Exception {
         ArrayList<Individual> selected = new ArrayList<Individual>();
         Individual best = null;
@@ -215,7 +167,6 @@ public class Algorithm {
         }
         return best;
     }
-<<<<<<< HEAD
     
     
     //Fitness sharing method
@@ -237,6 +188,4 @@ public class Algorithm {
         return sum;
     }
     
-=======
->>>>>>> f362eaef579d7f09b732ed921d0452852497e91b
 }
