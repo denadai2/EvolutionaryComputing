@@ -14,6 +14,12 @@ public class player27 implements ContestSubmission {
     private Random rnd_;
     private ContestEvaluation evaluation_;
     private int evaluations_limit_;
+    private int populationSize = 15;
+    private int offspringSize = 100;
+    
+    private boolean isMultimodal;
+    private boolean hasStructure;
+    private boolean isSeparable; 
 
     public player27() {
         rnd_ = new Random();
@@ -36,9 +42,9 @@ public class player27 implements ContestSubmission {
         // E.g. double param = Double.parseDouble(props.getProperty("property_name"));
         // Get evaluation properties
         evaluations_limit_ = Integer.parseInt(props.getProperty("Evaluations"));
-        boolean isMultimodal = Boolean.parseBoolean(props.getProperty("Multimodal"));
-        boolean hasStructure = Boolean.parseBoolean(props.getProperty("GlobalStructure"));
-        boolean isSeparable = Boolean.parseBoolean(props.getProperty("Separable"));
+        isMultimodal = Boolean.parseBoolean(props.getProperty("Multimodal"));
+        hasStructure = Boolean.parseBoolean(props.getProperty("GlobalStructure"));
+        isSeparable = Boolean.parseBoolean(props.getProperty("Separable"));
         System.out.println(evaluations_limit_ +" "+ isMultimodal +" "+ hasStructure +" "+ isSeparable);
         // Change settings(?)
         if (isMultimodal) {
@@ -60,20 +66,24 @@ public class player27 implements ContestSubmission {
             // E.g. evaluating a series of true/false predictions
             // boolean pred[] = ...
             // Double score = (Double)evaluation_.evaluate(pred);
-            Population pop = new Population(15, evaluation_);
-            int offspring = 100;
-            int i = 15 + offspring;
-            /*for(int j=0;j<15;j++)
-                System.out.println(pop.getIndividual(j).toString());*/
+            Population pop = new Population(populationSize, isMultimodal, evaluation_);
+            int i = populationSize + offspringSize;
+            
+            if(!isMultimodal){
+                populationSize = 10;
+                offspringSize = 70;
+            }
+           
+            Algorithm.evaluation_limit = evaluations_limit_;
             while (i < evaluations_limit_) {
-                pop = Algorithm.evolvePopulation(pop, offspring, false, evaluation_);
-                i += offspring;
+                pop = Algorithm.evolvePopulation(pop, offspringSize, true, evaluation_, isMultimodal, hasStructure, isSeparable);
+                i += offspringSize;
             }
             /*System.out.println("===> AFTER");
             for(int j=0;j<15;j++)
                 System.out.println(pop.getIndividual(j).toString());*/
         } catch (Exception ex) {
-            System.out.println("adasdasd");
+            //System.out.println("adasdasd");
             ex.printStackTrace();
         }
 

@@ -4,7 +4,6 @@
  */
 package classes;
 
-import java.util.Arrays;
 import org.vu.contest.ContestEvaluation;
 import utils.MergeSort;
 
@@ -27,14 +26,14 @@ public class Population {
         }
     }
 
-    public Population(int populationSize, ContestEvaluation evaluation) throws Exception {
+    public Population(int populationSize, boolean isMultimodal, ContestEvaluation evaluation) throws Exception {
         if (populationSize < 1) {
             throw new Exception();
         } else {
             this.populationSize = populationSize;
             individuals = new Individual[populationSize];
             for (int i = 0; i < populationSize; i++) {
-                Individual ind = new Individual();
+                Individual ind = new Individual(isMultimodal);
                 ind.generateIndividual(evaluation);
                 setIndividual(ind, i);
             }
@@ -43,7 +42,7 @@ public class Population {
 
     public void setIndividual(Individual ind, int index) throws Exception {
         if ((index < 0) || (index >= populationSize)) {
-            throw new Exception();
+            
         } else {
             individuals[index] = ind;
         }
