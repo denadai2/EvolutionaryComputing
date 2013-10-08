@@ -4,7 +4,6 @@
  */
 package classes;
 
-import java.util.Arrays;
 import org.vu.contest.ContestEvaluation;
 import utils.MergeSort;
 

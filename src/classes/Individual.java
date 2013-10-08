@@ -6,7 +6,6 @@ package classes;
 
 import java.util.Random;
 import org.vu.contest.ContestEvaluation;
-import java.util.Arrays;
 
 /**
  *
@@ -14,13 +13,13 @@ import java.util.Arrays;
  */
 public class Individual {
 
-    static public int geneNumber = 10;
+    final static public int geneNumber = 10;
     private double[] genes = new double[geneNumber];
     private double[] sigmas = new double[geneNumber];
     private double fitness = Double.MIN_VALUE;
     static private double minValue = -5.0;
     static private double maxValue = 5.0;
-    static private double minSigma = 0.1;
+    static private double minSigma = 0.01;
     static public Random ran = new Random(System.currentTimeMillis());
 
     public void generateIndividual(ContestEvaluation evaluation) {
