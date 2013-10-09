@@ -93,7 +93,7 @@ public class Individual {
     public String toString() {
         String geneString = "";
         for (int i = 0; i < geneNumber - 1; i++) {
-            geneString += genes[i] + " ";
+            geneString += genes[i] + " ("+sigmas[i]+") ";
         }
         geneString += genes[geneNumber - 1] + " ";
         return geneString + "\n Fitness:"+fitness;

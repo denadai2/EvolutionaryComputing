@@ -11,8 +11,9 @@ public class player27 implements ContestSubmission {
     private Random rnd_;
     private ContestEvaluation evaluation_;
     private int evaluations_limit_;
-    private int populationSize = 15;
-    private int offspringSize = 100;
+    private int populationSize = 35;
+    private int offspringSize = 140;
+    private boolean maintainParents = true;
     
     private boolean isMultimodal;
     private boolean hasStructure;
@@ -63,17 +64,19 @@ public class player27 implements ContestSubmission {
             // E.g. evaluating a series of true/false predictions
             // boolean pred[] = ...
             // Double score = (Double)evaluation_.evaluate(pred);
-            Population pop = new Population(populationSize, isMultimodal, evaluation_);
-            int i = populationSize + offspringSize;
             
             if(!isMultimodal){
                 populationSize = 10;
                 offspringSize = 70;
+                maintainParents = false;
             }
+            
+            Population pop = new Population(populationSize, isMultimodal, evaluation_);
+            int i = populationSize + offspringSize;
            
             Algorithm.evaluation_limit = evaluations_limit_;
             while (i < evaluations_limit_) {
-                pop = Algorithm.evolvePopulation(pop, offspringSize, true, evaluation_, isMultimodal, hasStructure, isSeparable);
+                pop = Algorithm.evolvePopulation(pop, offspringSize, maintainParents, evaluation_, isMultimodal, hasStructure, isSeparable);
                 i += offspringSize;
             }
             /*System.out.println("===> AFTER");

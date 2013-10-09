@@ -33,7 +33,7 @@ public class Algorithm {
             Individual parent2;
             if (isMultimodal) {
                 parent1 = randomSelection(pop);
-                parent2 = randomSelection(pop);
+                parent2 = similarSelection(pop, parent1);
             } else {
                 parent1 = tournamentSelection(pop, number_tournament_candidates);
                 parent2 = tournamentSelection(pop, number_tournament_candidates);
@@ -60,8 +60,9 @@ public class Algorithm {
         Individual[] fittests = offspringPopulation.getFittestIndividuals(pop.size());
         for (int i = 0; i < pop.size(); i++) {
             fittestOffspring.setIndividual(fittests[i], i);
+            //System.out.println("migliore:"+fittests[i].toString());
         }
-            //System.out.println("migliore:"+fittests[0].toString());
+            System.out.println("migliore:"+fittests[0].toString());
         return fittestOffspring;
     }
 
@@ -94,14 +95,14 @@ public class Algorithm {
         for (int i = 0; i < Individual.geneNumber; i++) {
             if (ran.nextDouble() <= mutation_ratio) {
                 double sigma;
-                if (isMultimodal) {
+                /*if (isMultimodal) {
                     double tau1 = 1.0 / Math.sqrt((double) (2 * pop_size));
                     double tau = 1.0 / Math.sqrt((double) (2 * Math.sqrt(pop_size)));
                     sigma = ind.getSigma(i) * Math.exp(tau1 * ran.nextGaussian() + tau * ran.nextGaussian());
-                } else {
+                } else {*/
                     sigma = 1.0 - ((double) evaluation_done / (double) evaluation_limit);
                     sigma = Math.pow(sigma, 2);
-                } 
+                //} 
                 ind.setSigma(i, sigma);
                 double gene = ind.getGene(i) + ran.nextGaussian() * ind.getSigma(i);
                 ind.setGene(i, gene);
@@ -112,7 +113,7 @@ public class Algorithm {
 
     private static Individual randomSelection(Population pop) throws Exception {
         int randomNumber = ran.nextInt(pop.size());
-        //System.out.println("random: "+ randomNumber + " "+randomNumber2);
+        //System.out.println("random: "+ randomNumber);
         return pop.getIndividual(randomNumber);
     }
     
@@ -127,6 +128,7 @@ public class Algorithm {
         for (idx=0; idx<pop.size() && randomNumber>0; ++idx) {
             randomNumber -= pop.getIndividual(idx).getFitness();
         }
+        
         return pop.getIndividual(idx-1);
     }
     
@@ -142,7 +144,7 @@ public class Algorithm {
             }
         }
         
-        //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString());
+        //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
         
         return pop.getIndividual(index);
     }
@@ -172,8 +174,9 @@ public class Algorithm {
     //Fitness sharing method
     private static double sharingFunction(Individual i1, Population offspringPopulation) throws Exception{
         double sum = 0;
-        double oshare = 5;
-        int alpha = 1;
+        //double oshare = ran.nextDouble();
+        double oshare = 0.15;
+        int alpha = 3;
         
         for (int i = 0; i < offspringPopulation.size(); i++) {
             Individual child = offspringPopulation.getIndividual(i);
