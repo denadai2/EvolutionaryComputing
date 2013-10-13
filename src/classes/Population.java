@@ -26,14 +26,14 @@ public class Population {
         }
     }
 
-    public Population(int populationSize, boolean isMultimodal, ContestEvaluation evaluation) throws Exception {
+    public Population(int populationSize, int individualLifeTime, boolean isMultimodal, ContestEvaluation evaluation) throws Exception {
         if (populationSize < 1) {
             throw new Exception();
         } else {
             this.populationSize = populationSize;
             individuals = new Individual[populationSize];
             for (int i = 0; i < populationSize; i++) {
-                Individual ind = new Individual(isMultimodal);
+                Individual ind = new Individual(individualLifeTime, isMultimodal);
                 ind.generateIndividual(evaluation);
                 setIndividual(ind, i);
             }
@@ -57,7 +57,7 @@ public class Population {
     }
 
     public Individual[] getFittestIndividuals(int number) throws Exception {
-        if ((number < 1) || (number >= populationSize)) {
+        if ((number < 1) || (number > populationSize)) {
             throw new Exception();
         } else if (!mergeCalled) {
             MergeSort.mergeSort(individuals);
