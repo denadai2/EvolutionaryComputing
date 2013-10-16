@@ -18,12 +18,15 @@ public class Population {
     private boolean mergeCalled = false;
 
     public Population(int populationSize) throws Exception {
-        if (populationSize < 1) {
+        if(populationSize == 0){
+            
+        }
+        else if (populationSize < 1) {
             throw new Exception();
         } else {
-            this.populationSize = populationSize;
             this.individuals = new Individual[populationSize];
         }
+        this.populationSize = populationSize;
     }
 
     public Population(int populationSize, int individualLifeTime, boolean isMultimodal, ContestEvaluation evaluation) throws Exception {

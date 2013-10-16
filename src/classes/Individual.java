@@ -24,12 +24,16 @@ public class Individual {
     static private double minSigma = 0.0000001; 
     static public Random ran = new Random(System.currentTimeMillis());
     public double[] ni = new double[geneNumber];
+    
+    //For DSS
+    public boolean marked = false;
+    public boolean master = false;
    
     public Individual(int individualLifeTime, boolean isMultimodal){
         lifeTime = individualLifeTime;
         
         if(isMultimodal)
-            minSigma = 0.01;
+            minSigma = 0.000001;
         
         for (int i = 0; i < geneNumber; i++) 
             ni[i] = ran.nextGaussian();

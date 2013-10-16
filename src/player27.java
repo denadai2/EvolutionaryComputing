@@ -11,9 +11,10 @@ public class player27 implements ContestSubmission {
     private Random rnd_;
     private ContestEvaluation evaluation_;
     private int evaluations_limit_;
-    private int populationSize = 35;
+    private int populationSize = 70;
     private int offspringSize = 490;
-    private int individualLifeTime = 1500;
+    private int individualLifeTime = 1500000000;
+    private boolean sharingMethod = true;
     
     private boolean isMultimodal;
     private boolean hasStructure;
@@ -70,13 +71,17 @@ public class player27 implements ContestSubmission {
                 offspringSize = 28;
                 individualLifeTime = 0;
             }
+            else if(evaluations_limit_ > 100000){
+                /*populationSize /=2;
+                offspringSize /=2;*/
+            }
             
             Population pop = new Population(populationSize, individualLifeTime, isMultimodal, evaluation_);
             int i = populationSize + offspringSize;
            
             Algorithm.evaluation_limit = evaluations_limit_;
             while (i < evaluations_limit_) {
-                pop = Algorithm.evolvePopulation(pop, offspringSize, individualLifeTime, evaluation_, isMultimodal, hasStructure, isSeparable);
+                pop = Algorithm.evolvePopulation(pop, offspringSize, individualLifeTime, sharingMethod, evaluation_, isMultimodal, hasStructure, isSeparable);
                 i += offspringSize;
             }
             /*System.out.println("===> AFTER");

@@ -14,6 +14,19 @@ import utils.Statistics;
  * @author denadai2
  */
 public class Selection {
+
+    private static Exception Exception() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private double distances[];
+    private static int storedIndex = -1;
+    public static int bu = -1;
+
+    public Selection(Population pop) throws Exception {
+        distances = Distance.populationDistance(pop);
+    }
+
     public static Individual randomSelection(Population pop) throws Exception {
         int randomNumber = ran.nextInt(pop.size());
         //System.out.println("random: "+ randomNumber);
@@ -23,20 +36,20 @@ public class Selection {
     public static Individual FPSSelection(Population pop) throws Exception {
         double totalFitness = 0.0;
         double[] fixedFitnesses = new double[pop.size()];
-        
+
         for (int i = 0; i < pop.size(); i++) {
             fixedFitnesses[i] = pop.getIndividual(i).getFitness();
         }
-        
+
         //Goldberg's sigma scaling
         Statistics stats = new Statistics(fixedFitnesses);
         double mean = stats.getMean();
         double std = stats.getStdDev();
-        
+
         for (int i = 0; i < pop.size(); i++) {
-            fixedFitnesses[i] = Math.max(fixedFitnesses[i]-(mean-2*std), 0.0);
+            fixedFitnesses[i] = Math.max(fixedFitnesses[i] - (mean - 2 * std), 0.0);
         }
-        
+
         //Roulette
         for (int i = 0; i < pop.size(); i++) {
             totalFitness += fixedFitnesses[i];
@@ -50,39 +63,46 @@ public class Selection {
         return pop.getIndividual(idx - 1);
     }
     
-    public static Individual RankingSelection(Population pop) throws Exception {
-        
+    public Individual RankingSelection(Population pop) throws Exception {
+        return RankingSelection(pop, true);
+    }
+
+    public Individual RankingSelection(Population pop, boolean storeIndex) throws Exception {
+
         Individual[] fittests = pop.getFittestIndividuals(pop.size());
         double[] probabilities = new double[pop.size()];
         double sum = 0;
-        
+
         Individual[] ranked = new Individual[pop.size()];
-        for(int i=0;i<pop.size();i++){
-            ranked[i] = fittests[pop.size()-i-1];
+        for (int i = 0; i < pop.size(); i++) {
+            ranked[i] = fittests[pop.size() - i - 1];
         }
-        
-        for(int i=0;i<pop.size();i++){
+
+        for (int i = 0; i < pop.size(); i++) {
             //exponential method
-            probabilities[i] = (1 - 1/Math.exp(i+1));
+            probabilities[i] = (1 - 1 / Math.exp(i + 1));
             sum += probabilities[i];
         }
-        
-        
-        double sum2=0;
-        for(int i=0;i<pop.size();i++){
+
+
+        double sum2 = 0;
+        for (int i = 0; i < pop.size(); i++) {
             probabilities[i] /= sum;
             sum2 += probabilities[i];
         }
-        
+
         double randomNumber = ran.nextDouble() * sum2;
         int idx;
         for (idx = 0; idx < pop.size() && randomNumber >= 0; ++idx) {
             randomNumber -= probabilities[idx];
         }
 
-        return ranked[idx-1];
+        if(storeIndex){
+            storedIndex = idx-1;
+        }
+        return ranked[idx - 1];
     }
-
+    
     public static Individual similarSelection(Population pop, Individual i1) throws Exception {
         double distance[] = new double[pop.size()];
         double min = Integer.MAX_VALUE;
@@ -96,10 +116,35 @@ public class Selection {
         }
 
         //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
+        bu = index;
+        return pop.getIndividual(index);
+    }
+
+    public Individual similarSelection(Population pop) throws Exception {
+        if(storedIndex == -1)
+            throw Exception();
+        
+        int r = storedIndex;
+        storedIndex = -1;
+        int n = pop.size();
+        double min = Integer.MAX_VALUE;
+        int index = 0;
+        double temp;
+        for (int c = 0; c < pop.size(); c++) {
+            int i = FromMatrixToVector(r, c, n);
+                
+            temp = distances[i];
+            if (min > temp && temp != 0.0) {
+                min = temp;
+                index = c;
+            }
+        }
+
+        //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
 
         return pop.getIndividual(index);
     }
-    
+
     public static Individual tournamentSelection(Population pop, int number_tournament_candidates) throws Exception {
         ArrayList<Individual> selected = new ArrayList<Individual>();
         Individual best = null;
@@ -119,5 +164,13 @@ public class Selection {
             }
         }
         return best;
+    }
+
+    private int FromMatrixToVector(int i, int j, int N) {
+        if (i <= j) {
+            return i * N - (i - 1) * i / 2 + j - i;
+        } else {
+            return j * N - (j - 1) * j / 2 + i - j;
+        }
     }
 }
