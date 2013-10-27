@@ -19,9 +19,10 @@ public class Individual {
     private double[] alphas = new double[(geneNumber*(geneNumber-1))/2];
     public int lifeTime = 5;
     private double fitness = Double.MIN_VALUE;
+    /*public double savedFitness = Double.MIN_VALUE;*/
     static private double minValue = -5.0;
     static private double maxValue = 5.0;
-    static private double minSigma = 0.0000001; 
+    static private double minSigma = 0.000000001; 
     static public Random ran = new Random(System.currentTimeMillis());
     public double[] ni = new double[geneNumber];
     
@@ -49,7 +50,6 @@ public class Individual {
             alphas[i] = 1.0;
         }
         fitness = (Double) evaluation.evaluate(genes);
-        //System.out.println("generato " + evaluation.evaluate(genes).toString());
     }
 
     public double getGene(int position) throws Exception {
@@ -66,10 +66,10 @@ public class Individual {
             throw new Exception();
         } else if (value > maxValue){
             genes[position] = (value-minValue)%(maxValue-minValue)+minValue;
-            genes[position] = maxValue;
+            //genes[position] = maxValue;
         } else if (value < minValue) {
             genes[position] = (value-minValue)%(maxValue-minValue)+maxValue;
-            genes[position] = minValue;
+            //genes[position] = minValue;
         } else {
             genes[position] = value;
         }

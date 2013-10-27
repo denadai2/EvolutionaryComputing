@@ -11,10 +11,10 @@ public class player27 implements ContestSubmission {
     private Random rnd_;
     private ContestEvaluation evaluation_;
     private int evaluations_limit_;
-    private int populationSize = 70;
-    private int offspringSize = 490;
-    private int individualLifeTime = 1500000000;
-    private boolean sharingMethod = true;
+    private int populationSize = 40;
+    private int offspringSize = 270;
+    private int lifeTimeGenerations = Integer.MAX_VALUE;
+    private boolean sharingMethod = false;
     
     private boolean isMultimodal;
     private boolean hasStructure;
@@ -69,20 +69,23 @@ public class player27 implements ContestSubmission {
             if(!isMultimodal){
                 populationSize = 4;
                 offspringSize = 28;
-                individualLifeTime = 0;
+                lifeTimeGenerations = 0;
             }
             else if(evaluations_limit_ > 100000){
-                /*populationSize /=2;
-                offspringSize /=2;*/
+                
+    populationSize = 70;
+    offspringSize = 490;
+                sharingMethod = false;
             }
             
-            Population pop = new Population(populationSize, individualLifeTime, isMultimodal, evaluation_);
+            Population pop = new Population(populationSize, lifeTimeGenerations, isMultimodal, evaluation_);
             int i = populationSize + offspringSize;
            
             Algorithm.evaluation_limit = evaluations_limit_;
             while (i < evaluations_limit_) {
-                pop = Algorithm.evolvePopulation(pop, offspringSize, individualLifeTime, sharingMethod, evaluation_, isMultimodal, hasStructure, isSeparable);
+                pop = Algorithm.evolvePopulation(pop, offspringSize, lifeTimeGenerations, sharingMethod, evaluation_, isMultimodal, hasStructure, isSeparable);
                 i += offspringSize;
+                //System.out.println(i+" "+evaluations_limit_);
             }
             /*System.out.println("===> AFTER");
             for(int j=0;j<15;j++)

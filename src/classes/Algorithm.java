@@ -1,7 +1,6 @@
 package classes;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Random;
 import org.vu.contest.ContestEvaluation;
 import utils.Distance;
@@ -15,17 +14,21 @@ public class Algorithm {
     private static double mutation_ratio = 1.0 / (double) Individual.geneNumber;
     private static int number_tournament_candidates = 3;
 
-    public static Population evolvePopulation(Population pop, int offspring, int individualLifeTime, boolean sharingMethod, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
+    public static Population evolvePopulation(Population pop, int offspring, int lifeTimeGenerations, boolean sharingMethod, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
         if (evaluation_done == 0) {
             evaluation_done += pop.size();
         }
         evaluation_done += offspring;
 
+        if (isMultimodal) {
+            mutation_ratio = 1.0;
+        }
+
         Population offspringPopulation = new Population(offspring);
         int startingPoint = 0;
 
         //age-based survival
-        if (individualLifeTime > 0) {
+        if (lifeTimeGenerations > 0) {
             int count = 0;
             for (int i = 0; i < pop.size(); i++) {
                 if (pop.getIndividual(i).lifeTime > 0) {
@@ -41,142 +44,81 @@ public class Algorithm {
         }
 
         //Per Ale: questa dovrebbe creare più nicchie ed applicare la sharingMethod, ma bisogna settare la oshare. Prova ^^
-        if(!sharingMethod)
-            startingPoint = applyDSIMethod(pop, offspringPopulation, startingPoint);
+        startingPoint = applyDSIMethod(pop, offspringPopulation, startingPoint, 0.3);
+        
 
-
-        double bestOne = -1;
-        Selection selector = new Selection(pop);
-        for (int i = startingPoint; i < offspring; i++) {
+        Selection selector = new Selection();
+        for (int i = startingPoint; i < offspring; i = i + 1) {
             Individual parent1;
             Individual parent2;
             if (isMultimodal) {
-                parent1 = Selection.FPSSelection(pop);
-                parent2 = Selection.FPSSelection(pop);
+
+
+
+                //After the 90% we will create more pressure
+                    /*if(evaluation_done/evaluation_limit < 0.9){
+                 parent1 = Selection.FPSSelection(pop);
+                 parent2 = Selection.FPSSelection(pop, parent1);
+                 }else{
+                 parent1 = Selection.RankingSelection(pop, false);
+                 do{
+                 parent2 = Selection.RankingSelection(pop, false);
+                 }while(parent1==parent2);
+                 }*/
+                parent1 = Selection.randomSelection(pop);
+                parent2 = selector.diffusionModelSelection(pop, parent1, 6);
+
+
+
             } else {
                 parent1 = Selection.tournamentSelection(pop, number_tournament_candidates);
-                parent2 = Selection.tournamentSelection(pop, number_tournament_candidates);
+                do {
+                    parent2 = Selection.tournamentSelection(pop, number_tournament_candidates);
+                } while (parent1 == parent2);
             }
-            Individual child = crossover(parent1, parent2, individualLifeTime, isMultimodal);
-            mutate(child, pop.size(), isMultimodal, Math.max(parent1.getFitness(), parent2.getFitness()));
+
+            Crossover crossover = new Crossover(lifeTimeGenerations, isMultimodal, evaluation_done);
+            Mutate mutator = new Mutate(pop.size(), evaluation_done);
+            Individual child;
+
+            if (isMultimodal) {
+                child = crossover.BLXCrossover(parent1, parent2, 0.5);
+                child = mutator.cauchyMutator(child, mutation_ratio);
+            } else {
+                child = crossover.NpointCrossover(parent1, parent2);
+                child = mutator.uncorrelatedMutator(child, mutation_ratio, 5);
+            }
+
 
             Double fitness = (Double) evaluation.evaluate(child.getGenes());
             child.setFitness(fitness);
-
             offspringPopulation.setIndividual(child, i);
-            if (bestOne < fitness) {
-                bestOne = fitness;
-            }
+
         }
 
         //Fitness sharing method
-        if (isMultimodal && bestOne > 0 && sharingMethod) {
-            offspringPopulation = applyFitnessSharingMethod(offspringPopulation);
-        }
+        /*if (isMultimodal && !negativeFitness && sharingMethod) {
+         offspringPopulation = applyFitnessSharingMethod(offspringPopulation);
+         }*/
 
         Population fittestOffspring = new Population(pop.size());
-        Individual[] fittests = offspringPopulation.getFittestIndividuals(pop.size());
-        for (int i = 0; i < pop.size(); i++) {
+        Individual[] fittests = offspringPopulation.getFittestIndividuals(fittestOffspring.size());
+        for (int i = 0; i < fittestOffspring.size(); i++) {
+            //recover the original fitness
+            /*if(isMultimodal && !negativeFitness && sharingMethod)
+             fittests[i].setFitness(fittests[i].savedFitness);*/
+
             fittestOffspring.setIndividual(fittests[i], i);
         }
 
+//fittests = offspringPopulation.getFittestIndividuals(pop.size());
+        //System.out.println("migliore:" + fittests[0].toString());
         //Re-calculate all the fitness sharings
-        /*if (isMultimodal && bestOne > 0 && sharingMethod) {
+        /*if (isMultimodal && !negativeFitness && sharingMethod) {
          fittestOffspring = applyFitnessSharingMethod(fittestOffspring);
          }*/
 
-        //System.out.println("migliore:" + fittests[0].toString());
         return fittestOffspring;
-    }
-
-    public static Individual crossover(Individual parent1, Individual parent2, int individualLifeTime, boolean isMultimodal) throws Exception {
-        Individual child = new Individual(individualLifeTime, isMultimodal);
-        /*double probability = 0.5; 
-         if (!isMultimodal) {
-         probability += ((double) evaluation_done) / ((double) evaluation_limit);
-         }
-         if (ran.nextDouble() < probability) {*/
-        for (int i = 0; i < Individual.geneNumber; i++) {
-            if (ran.nextBoolean()) {
-                child.setGene(i, parent1.getGene(i));
-                child.setSigma(i, parent1.getSigma(i));
-            } else {
-                child.setGene(i, parent2.getGene(i));
-                child.setSigma(i, parent2.getSigma(i));
-            }
-        }
-        /*} else {
-         for (int i = 0; i < Individual.geneNumber; i++) {
-         child.setGene(i, (parent1.getGene(i) + parent2.getGene(i) / 2));
-         child.setSigma(i, (parent1.getSigma(i) + parent2.getSigma(i) / 2));
-         }
-         }*/
-        return child;
-    }
-
-    public static void mutate(Individual ind, int pop_size, boolean isMultimodal, double max_fitness) throws Exception {
-        for (int i = 0; i < Individual.geneNumber; i++) {
-            if (ran.nextDouble() <= mutation_ratio) {
-                double sigma;
-                double alpha;
-                int Beta = 5;
-
-                //correlated mutation
-                /*if (isMultimodal) {
-                 //Covariance matrix
-                 double covariance[][] = new double[pop_size][pop_size];
-                 for (int j = 0; j < Individual.geneNumber; j++) {
-                 double sigmai = Math.pow(ind.getSigma(i), 2);
-                 if (j == i) {
-                 covariance[i][j] = sigmai;
-                 } else {
-                 covariance[i][j] = 1 / 2 * (sigmai - Math.pow(ind.getSigma(i), 2)) * Math.tan(2 * ind.getAlpha(i * j));
-                 }
-                 }
-
-
-                 double tau1 = 1.0 / Math.sqrt((double) (2 * pop_size));
-                 double tau = 1.0 / Math.sqrt((double) (2 * Math.sqrt(pop_size)));
-                 sigma = ind.getSigma(i) * Math.exp(tau1 * ran.nextGaussian() + tau * ran.nextGaussian());
-                 alpha = ind.getAlpha(i) + Beta * ran.nextGaussian();
-                 ind.setSigma(i, sigma);
-                 ind.setAlpha(i, alpha);
-
-                 double means[] = new double[pop_size];
-                 for (int j = 0; j < pop_size; j++) {
-                 means[j] = 0;
-                 }
-
-                 Gaussian gaussian = new Gaussian(tau, tau)
-                 double result[] = ml.sample();
-                 double gene = ind.getGene(i) + result[0];
-                 ind.setGene(i, gene);
-                 }*/ if (isMultimodal) {
-                    sigma = 1.0 - ((double) evaluation_done / (double) evaluation_limit);
-                    sigma = Math.pow(sigma, 2);
-                    ind.setSigma(i, sigma);
-                    double gene = ind.getGene(i) + ind.ni[i] * ind.getSigma(i);
-                    ind.setGene(i, gene);
-
-                    /*double tau1 = 1.0 / Math.sqrt((double) (2 * pop_size));
-                     double tau = 1.0 / Math.sqrt((double) (2 * Math.sqrt(pop_size)));
-                     sigma = ind.getSigma(i) * Math.exp(tau1 * ran.nextGaussian() + tau * ran.nextGaussian());
-                    
-                     ind.setSigma(i, sigma);
-                     double gene = ind.getGene(i) + ind.ni[i] * ind.getSigma(i);
-                     ind.setGene(i, gene);*/
-
-                } else {
-                    sigma = 1.0 - ((double) evaluation_done / (double) evaluation_limit);
-                    sigma = Math.pow(sigma, 5);
-                    ind.setSigma(i, sigma);
-                    double gene = ind.getGene(i) + ind.ni[i] * ind.getSigma(i);
-                    ind.setGene(i, gene);
-                }
-
-                //System.out.println("asdsadsad");
-            }
-        }
     }
 
     //Fitness sharing method
@@ -186,6 +128,7 @@ public class Algorithm {
         for (int i = 0; i < pop.size(); i++) {
             Individual child = pop.getIndividual(i);
             //System.out.println("Fitness: "+child.getFitness()+" "+(child.getFitness()/ sharingFunction(i, offspring, distance)));
+            //child.savedFitness = child.getFitness();
             child.setFitness(child.getFitness() / sharingFunction(i, pop.size(), distance));
             pop.setIndividual(child, i);
         }
@@ -214,10 +157,9 @@ public class Algorithm {
         return sum;
     }
 
-    private static int applyDSIMethod(Population pop, Population offspringPopulation, int startingPoint) throws Exception {
+    private static int applyDSIMethod(Population pop, Population offspringPopulation, int startingPoint, double oshare) throws Exception {
         Individual[] bests = pop.getFittestIndividuals(pop.size());
         int numberNiches = 0;
-        double oshare = 0.0001;
 
 
         //Dynamic Species Identification
@@ -236,8 +178,6 @@ public class Algorithm {
                         niches.get(numberNiches).add(tizio);
                         countVT1++;
                     }
-                    System.out.println(tizio.marked + " " + Distance.euclidian(tizio, tizio2));
-
                 }
 
                 if (countVT1 > 1) {
@@ -246,13 +186,6 @@ public class Algorithm {
                     numberNiches++;
                 }
             }
-        }
-
-        //reset all the used marking variable
-        for (int i = 0; i < pop.size(); i++) {
-            Individual i1 = pop.getIndividual(i);
-            i1.marked = false;
-            pop.setIndividual(i1, i);
         }
 
         //Dynamic Fitness Sharing (DFS)
@@ -271,6 +204,13 @@ public class Algorithm {
                 }
                 temp = applyFitnessSharingMethod(temp);
             }
+        }
+
+        //reset all the used marking variable
+        for (int i = 0; i < pop.size(); i++) {
+            Individual i1 = pop.getIndividual(i);
+            i1.marked = false;
+            pop.setIndividual(i1, i);
         }
 
         //copy the species masters in the new population

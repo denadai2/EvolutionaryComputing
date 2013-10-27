@@ -4,6 +4,7 @@
  */
 package utils;
 import java.util.Arrays;
+import java.util.Random;
 /**
  *
  * @author denadai2
@@ -12,6 +13,7 @@ public class Statistics
 {
     double[] data;
     double size;    
+    public static Random ran = new Random(System.currentTimeMillis());
 
     public Statistics(double[] data) 
     {
@@ -56,6 +58,13 @@ public class Statistics
                   return b[b.length / 2];
                }
         }
+        
+        /**
+     * Returns a real number with a Cauchy distribution.
+     */
+    public static double cauchy() {
+        return Math.tan(Math.PI * (ran.nextDouble() - 0.5));
+    }
 }
 
 

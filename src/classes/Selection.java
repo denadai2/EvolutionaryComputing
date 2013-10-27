@@ -18,13 +18,10 @@ public class Selection {
     private static Exception Exception() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-    private double distances[];
+    private double distances[] = new double[1];
     private static int storedIndex = -1;
-    public static int bu = -1;
 
-    public Selection(Population pop) throws Exception {
-        distances = Distance.populationDistance(pop);
+    public Selection() {
     }
 
     public static Individual randomSelection(Population pop) throws Exception {
@@ -34,6 +31,10 @@ public class Selection {
     }
 
     public static Individual FPSSelection(Population pop) throws Exception {
+        return FPSSelection(pop, null);
+    }
+
+    public static Individual FPSSelection(Population pop, Individual differentFromHim) throws Exception {
         double totalFitness = 0.0;
         double[] fixedFitnesses = new double[pop.size()];
 
@@ -50,24 +51,34 @@ public class Selection {
             fixedFitnesses[i] = Math.max(fixedFitnesses[i] - (mean - 2 * std), 0.0);
         }
 
-        //Roulette
         for (int i = 0; i < pop.size(); i++) {
             totalFitness += fixedFitnesses[i];
         }
-        double randomNumber = ran.nextDouble() * totalFitness;
-        int idx;
-        for (idx = 0; idx < pop.size() && randomNumber >= 0; ++idx) {
-            randomNumber -= fixedFitnesses[idx];
+
+        if (totalFitness == 0) {
+            return randomSelection(pop);
         }
 
-        return pop.getIndividual(idx - 1);
+        //Roulette
+        Individual selected;
+        double randomNumber;
+        do {
+            randomNumber = ran.nextDouble() * totalFitness;
+            int idx;
+            for (idx = 0; idx < pop.size() && randomNumber >= 0; ++idx) {
+                randomNumber -= fixedFitnesses[idx];
+            }
+            selected = pop.getIndividual(idx - 1);
+        } while (selected == differentFromHim);
+
+        return selected;
     }
-    
+
     public Individual RankingSelection(Population pop) throws Exception {
         return RankingSelection(pop, true);
     }
 
-    public Individual RankingSelection(Population pop, boolean storeIndex) throws Exception {
+    public static Individual RankingSelection(Population pop, boolean storeIndex) throws Exception {
 
         Individual[] fittests = pop.getFittestIndividuals(pop.size());
         double[] probabilities = new double[pop.size()];
@@ -97,12 +108,13 @@ public class Selection {
             randomNumber -= probabilities[idx];
         }
 
-        if(storeIndex){
-            storedIndex = idx-1;
+        if (storeIndex) {
+            storedIndex = idx - 1;
         }
+
         return ranked[idx - 1];
     }
-    
+
     public static Individual similarSelection(Population pop, Individual i1) throws Exception {
         double distance[] = new double[pop.size()];
         double min = Integer.MAX_VALUE;
@@ -116,14 +128,102 @@ public class Selection {
         }
 
         //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
-        bu = index;
         return pop.getIndividual(index);
     }
 
-    public Individual similarSelection(Population pop) throws Exception {
-        if(storedIndex == -1)
-            throw Exception();
+    public Individual diffusionModelSelection(Population pop, Individual i1, int gridSize) throws Exception {
         
+        if(distances.length == 1)
+            calculateDistanceMatrix(pop);
+
+        ArrayList<Individual> simili = pickSimilarWithReplace(pop, i1, gridSize);
+        //Search for negative fitness values. If so we normalize them.
+        double min = minFitness(simili);
+        double negativeNormalizatorValue = 0;
+        if (min < 0.0) {
+            negativeNormalizatorValue += min * -1;
+        }
+
+        //roulette wheel
+        double totalFitness = 0;
+        for (int j = 0; j < gridSize; j++) {
+            totalFitness += simili.get(j).getFitness() + negativeNormalizatorValue;
+        }
+        double randNum = ran.nextDouble() * totalFitness;
+        int idx;
+        for (idx = 0; idx < pop.size() && randNum > 0; ++idx) {
+            randNum -= simili.get(idx).getFitness() + negativeNormalizatorValue;
+        }
+
+        return simili.get(idx - 1);
+    }
+
+    private ArrayList<Individual> pickSimilarWithReplace(Population pop, Individual i1, int num) throws Exception {
+        int r = 0;
+        for (int i = 0; i < pop.size(); i++) {
+            if (i1 == pop.getIndividual(i)) {
+                r = i;
+            }
+        }
+
+        //modified indexies
+        ArrayList<Integer> modifiedIndexies = new ArrayList<Integer>();
+        ArrayList<Double> modifiedValues = new ArrayList<Double>();
+        ArrayList<Individual> individuals = new ArrayList<Individual>();
+
+
+        for (int j = 0; j < num; j++) {
+            int n = pop.size();
+            double min = Integer.MAX_VALUE;
+            int index = 0;
+            double temp;
+            for (int c = 0; c < pop.size(); c++) {
+                int i = FromMatrixToVector(r, c, n);
+
+                temp = distances[i];
+                if (min > temp && temp != 0.0) {
+                    min = temp;
+                    index = c;
+                }
+            }
+
+            int distancesIndex = FromMatrixToVector(r, index, n);
+
+            modifiedIndexies.add(distancesIndex);
+            modifiedValues.add(distances[distancesIndex]);
+            distances[distancesIndex] = Integer.MAX_VALUE;
+
+            individuals.add(pop.getIndividual(index));
+        }
+
+        for (int j = 0; j < modifiedIndexies.size(); j++) {
+            distances[modifiedIndexies.get(j)] = modifiedValues.get(j);
+        }
+
+        //int minIndex = list.indexOf(Collections.min(list));
+
+        //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
+
+        return individuals;
+    }
+
+    private static double minFitness(ArrayList<Individual> pop) throws Exception {
+        double min = Integer.MAX_VALUE;
+
+        for (int i = 0; i < pop.size(); i++) {
+            if (pop.get(i).getFitness() < min) {
+                min = pop.get(i).getFitness();
+            }
+        }
+
+        return min;
+    }
+
+    public Individual similarSelection(Population pop) throws Exception {
+        if (storedIndex == -1) {
+            throw Exception();
+        }
+
         int r = storedIndex;
         storedIndex = -1;
         int n = pop.size();
@@ -132,7 +232,7 @@ public class Selection {
         double temp;
         for (int c = 0; c < pop.size(); c++) {
             int i = FromMatrixToVector(r, c, n);
-                
+
             temp = distances[i];
             if (min > temp && temp != 0.0) {
                 min = temp;
@@ -164,6 +264,10 @@ public class Selection {
             }
         }
         return best;
+    }
+    
+    private void calculateDistanceMatrix(Population pop) throws Exception {
+        distances = Distance.populationDistance(pop);
     }
 
     private int FromMatrixToVector(int i, int j, int N) {
