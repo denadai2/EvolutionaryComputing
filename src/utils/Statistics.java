@@ -65,6 +65,15 @@ public class Statistics
     public static double cauchy() {
         return Math.tan(Math.PI * (ran.nextDouble() - 0.5));
     }
+    
+    /*public double levy(double x)
+    {
+        if(x < location)
+            return Double.NEGATIVE_INFINITY;
+        final double mu = x-location;
+        return -(-mu*logScale+scale+3*mu*log(mu)+mu*log(PI)+mu*log(2))/(2*mu);
+    }*/
+
 }
 
 

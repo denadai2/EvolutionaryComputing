@@ -4,6 +4,7 @@
  */
 package classes;
 
+import java.util.Random;
 import org.vu.contest.ContestEvaluation;
 import utils.MergeSort;
 
@@ -16,6 +17,8 @@ public class Population {
     private Individual[] individuals;
     private int populationSize;
     private boolean mergeCalled = false;
+    static public Random ran = new Random(System.currentTimeMillis());
+    public double nf1=0,nf2=0,ns1=0,ns2=0;
 
     public Population(int populationSize) throws Exception {
         if(populationSize == 0){

@@ -123,7 +123,7 @@ public class Mutate {
                 double sigma;
 
                 sigma = 1.0 - ((double) evaluation_done / (double) evaluation_limit);
-                sigma = Math.pow(sigma, 2);
+                sigma = Math.pow(sigma, 3);
                 ind.setSigma(i, sigma);
                 double gene = ind.getGene(i) + ind.getSigma(i) * Statistics.cauchy();
                 ind.setGene(i, gene);

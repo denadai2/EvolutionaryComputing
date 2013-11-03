@@ -4,14 +4,18 @@
  */
 package classes;
 
-import java.util.Random;
 import org.vu.contest.ContestEvaluation;
+import static classes.Population.ran;
 
 /**
  *
  * @author Alessandro
  */
 public class Individual {
+    
+    public static enum MutationType {
+        NONE, CAUCHY, UNCORRELATED 
+    }
 
     final static public int geneNumber = 10;
     private double[] genes = new double[geneNumber];
@@ -23,8 +27,9 @@ public class Individual {
     static private double minValue = -5.0;
     static private double maxValue = 5.0;
     static private double minSigma = 0.000000001; 
-    static public Random ran = new Random(System.currentTimeMillis());
     public double[] ni = new double[geneNumber];
+    public MutationType mutationType = MutationType.NONE;
+    public double CR = 0.1*ran.nextGaussian()+0.5;
     
     //For DSS
     public boolean marked = false;
@@ -32,9 +37,6 @@ public class Individual {
    
     public Individual(int individualLifeTime, boolean isMultimodal){
         lifeTime = individualLifeTime;
-        
-        if(isMultimodal)
-            minSigma = 0.000001;
         
         for (int i = 0; i < geneNumber; i++) 
             ni[i] = ran.nextGaussian();

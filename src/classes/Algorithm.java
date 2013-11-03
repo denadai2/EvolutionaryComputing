@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import org.vu.contest.ContestEvaluation;
 import utils.Distance;
+import classes.Individual.MutationType;
 //import utils.Gaussian;
 
 public class Algorithm {
@@ -14,11 +15,12 @@ public class Algorithm {
     private static double mutation_ratio = 1.0 / (double) Individual.geneNumber;
     private static int number_tournament_candidates = 3;
 
-    public static Population evolvePopulation(Population pop, int offspring, int lifeTimeGenerations, boolean sharingMethod, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
+    public static Population evolvePopulation(Population pop, int offspring, int lifeTimeGenerations, boolean sharingMethod, double pCauchy, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
         if (evaluation_done == 0) {
             evaluation_done += pop.size();
         }
         evaluation_done += offspring;
+
 
         if (isMultimodal) {
             mutation_ratio = 1.0;
@@ -37,23 +39,20 @@ public class Algorithm {
                     offspringPopulation.setIndividual(c, count);
                     count++;
                 } else {
-                    System.out.println("killato");
                 }
             }
             startingPoint = count;
         }
 
         //Per Ale: questa dovrebbe creare più nicchie ed applicare la sharingMethod, ma bisogna settare la oshare. Prova ^^
-        startingPoint = applyDSIMethod(pop, offspringPopulation, startingPoint, 0.3);
-        
+        //startingPoint = applyDSIMethod(pop, offspringPopulation, startingPoint, 0.3);
+
 
         Selection selector = new Selection();
         for (int i = startingPoint; i < offspring; i = i + 1) {
             Individual parent1;
             Individual parent2;
             if (isMultimodal) {
-
-
 
                 //After the 90% we will create more pressure
                     /*if(evaluation_done/evaluation_limit < 0.9){
@@ -77,13 +76,24 @@ public class Algorithm {
                 } while (parent1 == parent2);
             }
 
+
+
             Crossover crossover = new Crossover(lifeTimeGenerations, isMultimodal, evaluation_done);
             Mutate mutator = new Mutate(pop.size(), evaluation_done);
             Individual child;
 
             if (isMultimodal) {
                 child = crossover.BLXCrossover(parent1, parent2, 0.5);
-                child = mutator.cauchyMutator(child, mutation_ratio);
+                if (ran.nextDouble() < pCauchy) {
+                    child = mutator.cauchyMutator(child, mutation_ratio);
+                    child.mutationType = MutationType.CAUCHY;
+                } else {
+                    child = mutator.uncorrelatedMutator(child, mutation_ratio, 4);
+                    child.mutationType = MutationType.UNCORRELATED;
+                }
+
+                child.CR = ((double) evaluation_done / (double) evaluation_limit);
+
             } else {
                 child = crossover.NpointCrossover(parent1, parent2);
                 child = mutator.uncorrelatedMutator(child, mutation_ratio, 5);
@@ -102,15 +112,37 @@ public class Algorithm {
          }*/
 
         Population fittestOffspring = new Population(pop.size());
+        fittestOffspring.ns1 = pop.ns1;
+        fittestOffspring.ns2 = pop.ns2;
+        fittestOffspring.nf1 = pop.nf1;
+        fittestOffspring.nf2 = pop.nf2;
         Individual[] fittests = offspringPopulation.getFittestIndividuals(fittestOffspring.size());
         for (int i = 0; i < fittestOffspring.size(); i++) {
             //recover the original fitness
             /*if(isMultimodal && !negativeFitness && sharingMethod)
              fittests[i].setFitness(fittests[i].savedFitness);*/
-
+            if (fittests[i].mutationType == MutationType.CAUCHY) {
+                fittestOffspring.ns1++;
+            } else {
+                fittestOffspring.ns2++;
+            }
+            //reset the mutationType in order to check the discarded individuals (see later)
+            fittests[i].mutationType = MutationType.NONE;
+            
             fittestOffspring.setIndividual(fittests[i], i);
         }
 
+        
+        //check the discarded individual by mutations type
+        if (isMultimodal) {
+            for (int j = 0; j < pop.size(); j++) {
+                if (pop.getIndividual(j).mutationType == MutationType.CAUCHY) {
+                    fittestOffspring.nf1++;
+                } else if (pop.getIndividual(j).mutationType == MutationType.UNCORRELATED) {
+                    fittestOffspring.nf2++;
+                }
+            }
+        }
 //fittests = offspringPopulation.getFittestIndividuals(pop.size());
         //System.out.println("migliore:" + fittests[0].toString());
         //Re-calculate all the fitness sharings
