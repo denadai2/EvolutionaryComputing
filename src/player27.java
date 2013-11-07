@@ -12,8 +12,8 @@ public class player27 implements ContestSubmission {
     private Random rnd_;
     private ContestEvaluation evaluation_;
     private int evaluations_limit_;
-    private int populationSize = 70;
-    private int offspringSize = 490;
+    private int populationSize = 150;
+    private int offspringSize = 1200;
     private int lifeTimeGenerations = Integer.MAX_VALUE;
     private boolean sharingMethod = false;
     private boolean isMultimodal;
@@ -72,11 +72,12 @@ public class player27 implements ContestSubmission {
                 lifeTimeGenerations = 0;
             } else if (evaluations_limit_ > 100000) {
 
-                populationSize = 70;
-                offspringSize = 490;
+                populationSize = 500;
+                offspringSize = 4000;
                 sharingMethod = false;
             }
             double discoveryPressure = 0.5;
+            boolean done = false;
 
 
             Population pop = new Population(populationSize, lifeTimeGenerations, isMultimodal, evaluation_);
@@ -90,20 +91,26 @@ public class player27 implements ContestSubmission {
                 if (isMultimodal) {
                     //We will use the cauchy mutator in the first phase then the uncorrelated mutator
                     discoveryPressure = (pop.ns1 * (pop.ns2 + pop.nf2)) / ((pop.ns1 * (pop.ns2 + pop.nf2)) + (pop.ns2 * (pop.ns1 + pop.nf1)));
+                    if(discoveryPressure == 1.0)
+                        discoveryPressure = 0.8;
+                    else if(discoveryPressure == 0)
+                        discoveryPressure = 0.2;
+                    //System.out.println("asd"+discoveryPressure+ " "+pop.ns1+ " "+pop.ns2+ " "+pop.nf1+ " "+pop.nf2);
                     pop.ns1 = 0;
                     pop.ns2 = 0;
                     pop.nf1 = 0;
                     pop.nf2 = 0;
                     double e = ((i * 1.0) / evaluations_limit_);
-
-                    if (e > 0.4) {
+                    
+                    if (e > 0.4 && !done) {
                         if (evaluations_limit_ > 100000) {
-                            offspringSize = 270;
-                            populationSize = 40;
+                            offspringSize = 1000;
+                            populationSize = 125;
                         } else {
-                            offspringSize = 210;
-                            populationSize = 30;
+                            offspringSize = 400;
+                            populationSize = 50;
                         }
+                        done = true;
 
                         Population fittestOffspring = new Population(populationSize);
                         fittestOffspring.ns1 = pop.ns1;
@@ -120,7 +127,7 @@ public class player27 implements ContestSubmission {
                 }
 
 
-                offspringSize = Math.min(offspringSize, evaluations_limit_-i);
+                //offspringSize = Math.min(offspringSize, evaluations_limit_-i);
                 i += offspringSize;
             }
             /*System.out.println("===> AFTER");

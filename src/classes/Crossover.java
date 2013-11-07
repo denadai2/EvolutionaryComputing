@@ -73,6 +73,7 @@ public class Crossover {
          probability += ((double) evaluation_done) / ((double) evaluation_limit);
 
          if (ran.nextDouble() < probability) {*/
+        
         for (int i = 0; i < Individual.geneNumber; i++) {
             if (ran.nextBoolean()) {
                 child.setGene(i, parent1.getGene(i));

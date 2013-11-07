@@ -26,7 +26,7 @@ public class Individual {
     /*public double savedFitness = Double.MIN_VALUE;*/
     static private double minValue = -5.0;
     static private double maxValue = 5.0;
-    static private double minSigma = 0.000000001; 
+    static private double minSigma = 0.0000000001; 
     public double[] ni = new double[geneNumber];
     public MutationType mutationType = MutationType.NONE;
     public double CR = 0.1*ran.nextGaussian()+0.5;

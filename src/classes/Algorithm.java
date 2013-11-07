@@ -65,7 +65,7 @@ public class Algorithm {
                  }while(parent1==parent2);
                  }*/
                 parent1 = Selection.randomSelection(pop);
-                parent2 = selector.diffusionModelSelection(pop, parent1, 6);
+                parent2 = selector.diffusionModelSelection(pop, parent1, 3);
 
 
 
@@ -88,11 +88,11 @@ public class Algorithm {
                     child = mutator.cauchyMutator(child, mutation_ratio);
                     child.mutationType = MutationType.CAUCHY;
                 } else {
-                    child = mutator.uncorrelatedMutator(child, mutation_ratio, 4);
+                    child = mutator.uncorrelatedMutator(child, mutation_ratio, 7);
                     child.mutationType = MutationType.UNCORRELATED;
                 }
 
-                child.CR = ((double) evaluation_done / (double) evaluation_limit);
+                //child.CR = ((double) evaluation_done / (double) evaluation_limit);
 
             } else {
                 child = crossover.NpointCrossover(parent1, parent2);
@@ -123,11 +123,9 @@ public class Algorithm {
              fittests[i].setFitness(fittests[i].savedFitness);*/
             if (fittests[i].mutationType == MutationType.CAUCHY) {
                 fittestOffspring.ns1++;
-            } else {
+            } else if (fittests[i].mutationType == MutationType.UNCORRELATED){
                 fittestOffspring.ns2++;
             }
-            //reset the mutationType in order to check the discarded individuals (see later)
-            fittests[i].mutationType = MutationType.NONE;
             
             fittestOffspring.setIndividual(fittests[i], i);
         }
@@ -135,14 +133,17 @@ public class Algorithm {
         
         //check the discarded individual by mutations type
         if (isMultimodal) {
-            for (int j = 0; j < pop.size(); j++) {
-                if (pop.getIndividual(j).mutationType == MutationType.CAUCHY) {
+            for (int j = 0; j < offspringPopulation.size(); j++) {
+                if (offspringPopulation.getIndividual(j).mutationType == MutationType.CAUCHY) {
                     fittestOffspring.nf1++;
-                } else if (pop.getIndividual(j).mutationType == MutationType.UNCORRELATED) {
+                } else if (offspringPopulation.getIndividual(j).mutationType == MutationType.UNCORRELATED) {
                     fittestOffspring.nf2++;
                 }
             }
         }
+        
+        fittestOffspring.nf1 -= fittestOffspring.ns1;
+        fittestOffspring.nf2 -= fittestOffspring.ns2;
 //fittests = offspringPopulation.getFittestIndividuals(pop.size());
         //System.out.println("migliore:" + fittests[0].toString());
         //Re-calculate all the fitness sharings
