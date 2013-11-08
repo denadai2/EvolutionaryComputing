@@ -23,10 +23,9 @@ public class Individual {
     private double[] alphas = new double[(geneNumber*(geneNumber-1))/2];
     public int lifeTime = 5;
     private double fitness = Double.MIN_VALUE;
-    /*public double savedFitness = Double.MIN_VALUE;*/
     static private double minValue = -5.0;
     static private double maxValue = 5.0;
-    static private double minSigma = 0.0000000001; 
+    static private double minSigma = 0.000000001; 
     public double[] ni = new double[geneNumber];
     public MutationType mutationType = MutationType.NONE;
     public double CR = 0.1*ran.nextGaussian()+0.5;
@@ -75,7 +74,6 @@ public class Individual {
         } else {
             genes[position] = value;
         }
-        //System.out.println(value + " " + Arrays.toString(genes));
     }
     
     public double[] getGenes() {

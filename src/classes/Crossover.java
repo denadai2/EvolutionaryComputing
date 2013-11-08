@@ -4,7 +4,6 @@
  */
 package classes;
 
-import static classes.Algorithm.evaluation_limit;
 import static classes.Algorithm.ran;
 import java.util.ArrayList;
 
@@ -69,10 +68,6 @@ public class Crossover {
 
     public Individual NpointCrossover(Individual parent1, Individual parent2) throws Exception {
         Individual child = new Individual(individualLifeTime, isMultiModal);
-        /*double probability = 0.5;
-         probability += ((double) evaluation_done) / ((double) evaluation_limit);
-
-         if (ran.nextDouble() < probability) {*/
         
         for (int i = 0; i < Individual.geneNumber; i++) {
             if (ran.nextBoolean()) {
@@ -83,12 +78,6 @@ public class Crossover {
                 child.setSigma(i, parent2.getSigma(i));
             }
         }
-        /* }else{
-         if (ran.nextBoolean())
-         child = parent1;
-         else
-         child = parent2;
-         }*/
 
 
         return child;

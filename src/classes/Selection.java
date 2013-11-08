@@ -26,7 +26,6 @@ public class Selection {
 
     public static Individual randomSelection(Population pop) throws Exception {
         int randomNumber = ran.nextInt(pop.size());
-        //System.out.println("random: "+ randomNumber);
         return pop.getIndividual(randomNumber);
     }
 
@@ -199,11 +198,7 @@ public class Selection {
         for (int j = 0; j < modifiedIndexies.size(); j++) {
             distances[modifiedIndexies.get(j)] = modifiedValues.get(j);
         }
-
-        //int minIndex = list.indexOf(Collections.min(list));
-
-        //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
-
+        
         return individuals;
     }
 
@@ -239,8 +234,6 @@ public class Selection {
                 index = c;
             }
         }
-
-        //System.out.println("Selezionato p1: "+i1.toString()+" p2:"+pop.getIndividual(index).toString()+" dist "+min);
 
         return pop.getIndividual(index);
     }
