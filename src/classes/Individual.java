@@ -20,7 +20,7 @@ public class Individual {
     final static public int geneNumber = 10;
     private double[] genes = new double[geneNumber];
     private double[] sigmas = new double[geneNumber];
-    private double[] alphas = new double[(geneNumber*(geneNumber-1))/2];
+    //private double[] alphas = new double[(geneNumber*(geneNumber-1))/2];
     public int lifeTime = 5;
     private double fitness = Double.MIN_VALUE;
     static private double minValue = -5.0;
@@ -47,9 +47,9 @@ public class Individual {
             genes[i] = gene;
             sigmas[i] = 1.0;
         }
-        for (int i = 0; i < (geneNumber*(geneNumber-1))/2; i++) {
+        /*for (int i = 0; i < (geneNumber*(geneNumber-1))/2; i++) {
             alphas[i] = 1.0;
-        }
+        }*/
         fitness = (Double) evaluation.evaluate(genes);
     }
 
@@ -98,7 +98,7 @@ public class Individual {
         }
     }
     
-    public double getAlpha(int position) throws Exception{
+    /*public double getAlpha(int position) throws Exception{
         if ((position >= (geneNumber*(geneNumber-1))/2-1) || (position < 0)) {
             throw new Exception();
         } else {
@@ -114,7 +114,7 @@ public class Individual {
         } else {
             alphas[position] = value;
         }
-    }
+    }*/
 
     public void setFitness(double fitness) {
         this.fitness = fitness;

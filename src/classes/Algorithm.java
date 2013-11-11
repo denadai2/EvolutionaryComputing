@@ -13,7 +13,7 @@ public class Algorithm {
     private static double mutation_ratio = 1.0 / (double) Individual.geneNumber;
     private static int number_tournament_candidates = 3;
 
-    public static Population evolvePopulation(Population pop, int offspring, int lifeTimeGenerations, boolean sharingMethod, double pCauchy, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
+    public static Population evolvePopulation(Population pop, int offspring, int lifeTimeGenerations, boolean sharingMethod, double discoveryPressure, ContestEvaluation evaluation, boolean isMultimodal, boolean hasStructure, boolean isSeparable) throws Exception {
         if (evaluation_done == 0) {
             evaluation_done += pop.size();
         }
@@ -66,7 +66,7 @@ public class Algorithm {
 
             if (isMultimodal) {
                 child = crossover.BLXCrossover(parent1, parent2, 0.5);
-                if (ran.nextDouble() < pCauchy) {
+                if (ran.nextDouble() < discoveryPressure) {
                     child = mutator.cauchyMutator(child, mutation_ratio);
                     child.mutationType = MutationType.CAUCHY;
                 } else {
@@ -75,7 +75,7 @@ public class Algorithm {
                 }
 
             } else {
-                child = crossover.NpointCrossover(parent1, parent2);
+                child = crossover.uniformCrossover(parent1, parent2);
                 child = mutator.uncorrelatedMutator(child, mutation_ratio, 5);
             }
 

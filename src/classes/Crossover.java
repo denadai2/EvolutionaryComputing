@@ -66,7 +66,7 @@ public class Crossover {
         return child;
     }
 
-    public Individual NpointCrossover(Individual parent1, Individual parent2) throws Exception {
+    public Individual uniformCrossover(Individual parent1, Individual parent2) throws Exception {
         Individual child = new Individual(individualLifeTime, isMultiModal);
         
         for (int i = 0; i < Individual.geneNumber; i++) {
