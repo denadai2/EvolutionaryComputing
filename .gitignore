@@ -12,3 +12,9 @@ nbproject/project.properties
 nbproject/project.xml
 
 nbproject/private/config.properties
+lib/
+nbproject/
+build/
+manifest.mf
+build.xml
+submissionTester/tmp
